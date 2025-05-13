@@ -4,6 +4,7 @@ import './register.css';
 import { fetchData } from '../../../helpers/axiosHelper';
 import { registerSchema } from '../../../schemas/registerSchema';
 import { ZodError } from 'zod';
+import { Link, useNavigate } from 'react-router-dom';
 
 const initialValue = {
   name: '',
@@ -18,6 +19,8 @@ const Register = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [valErrors, setValErrors] = useState({});
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setRegisterData({ ...registerData, [name]: value });
@@ -26,11 +29,11 @@ const Register = () => {
   const onSubmit = async () => {
     try {
       registerSchema.parse(registerData);
-      const result = await fetchData('user/register', 'post', registerData);
-      console.log('EEEEEEEEEEEEERROR', result);
+      await fetchData('user/register', 'post', registerData);
+      //REPLACE TRUE HACE QUE NO PUEDAS VOLVER HACIA ATRÁS EN EL NAVEGADOR
+      navigate('/login', { replace: true });
     } catch (error) {
       if (error instanceof ZodError) {
-        console.log('qwerasdfasdfqwersdf', error.errors);
         //MANEJO DE OBJETOS TEMPORALES
         let objTemp = {};
         error.errors.forEach((er) => {
@@ -130,6 +133,9 @@ const Register = () => {
               <p className="text-danger">{errorMsg}</p>
               <Button onClick={onSubmit}>Submit</Button>
             </Form>
+            <p className="mt-2">
+              Si ya estás registrado <Link to="/login">login aquí</Link>
+            </p>
           </Col>
         </Row>
       </Container>

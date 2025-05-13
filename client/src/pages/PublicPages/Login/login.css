@@ -1,0 +1,10 @@
+.image-form {
+  width: 100%;
+  max-width: 450px;
+  img {
+    width: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+}

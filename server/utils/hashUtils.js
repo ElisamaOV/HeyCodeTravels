@@ -9,4 +9,11 @@ export const hashString = async (string) => {
   }
 };
 
-export const compareString = async (string, hashString) => {};
+export const compareString = async (string, hashString) => {
+  try {
+    const match = bcrypt.compare(string, hashString);
+    return match;
+  } catch (error) {
+    throw error;
+  }
+};
