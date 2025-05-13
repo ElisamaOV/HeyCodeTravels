@@ -1,4 +1,5 @@
 import executeQuery from '../../config/db.js';
+import { hashString } from '../../utils/hashUtils.js';
 import userDal from './user.dal.js';
 
 class UserController {
@@ -17,9 +18,20 @@ class UserController {
 
   register = async (req, res) => {
     try {
-      console.log(req.body);
-      res.status(201).json({ message: 'Usuario Creado correctamente' });
+      const { name, lastname, email, password } = req.body;
+      //1 Comprobar que el email no exista
+      let result = await userDal.findUserByEmail(email);
+      if (result.length) {
+        throw { message: 'El usuario ya existe' };
+      } else {
+        const hashedPassword = await hashString(password);
+        const data = { email, hashedPassword, name, lastname };
+        await userDal.register(data);
+        res.status(201).json({ message: 'Usuario Creado correctamente' });
+      }
     } catch (error) {
+      console.log('ERROR CATCH', error);
+
       res.status(500).json(error);
     }
   };

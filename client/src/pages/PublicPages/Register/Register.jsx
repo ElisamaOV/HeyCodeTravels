@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Col, Container, Form, Row, Button } from 'react-bootstrap';
 import './register.css';
 import { fetchData } from '../../../helpers/axiosHelper';
+import { registerSchema } from '../../../schemas/registerSchema';
+import { ZodError } from 'zod';
 
 const initialValue = {
   name: '',
@@ -14,6 +16,7 @@ const initialValue = {
 const Register = () => {
   const [registerData, setRegisterData] = useState(initialValue);
   const [errorMsg, setErrorMsg] = useState('');
+  const [valErrors, setValErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,10 +25,25 @@ const Register = () => {
 
   const onSubmit = async () => {
     try {
+      registerSchema.parse(registerData);
       const result = await fetchData('user/register', 'post', registerData);
-      console.log(result);
+      console.log('EEEEEEEEEEEEERROR', result);
     } catch (error) {
-      setErrorMsg('Ups ha habido un error');
+      if (error instanceof ZodError) {
+        console.log('qwerasdfasdfqwersdf', error.errors);
+        //MANEJO DE OBJETOS TEMPORALES
+        let objTemp = {};
+        error.errors.forEach((er) => {
+          objTemp[er.path[0]] = er.message;
+          //MANEJO DE OBJETOS TEMPORALES FINAL
+        });
+        setValErrors(objTemp);
+      }
+      if (error.response) {
+        setErrorMsg(error.response.data.message);
+      } else {
+        setErrorMsg('Ups, ha habido un error');
+      }
       console.log(error);
     }
   };
@@ -55,6 +73,9 @@ const Register = () => {
                   value={registerData.name}
                   onChange={handleChange}
                 />
+                {valErrors.name && (
+                  <p className="text-danger">{valErrors.name}</p>
+                )}
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="LastNameTextInput">Apellidos</Form.Label>
@@ -64,6 +85,9 @@ const Register = () => {
                   value={registerData.lastname}
                   onChange={handleChange}
                 />
+                {valErrors.lastname && (
+                  <p className="text-danger">{valErrors.lastname}</p>
+                )}
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="EmailTextInput">Email</Form.Label>
@@ -73,6 +97,9 @@ const Register = () => {
                   value={registerData.email}
                   onChange={handleChange}
                 />
+                {valErrors.email && (
+                  <p className="text-danger">{valErrors.email}</p>
+                )}
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="PasswordTextInput">Contraseña</Form.Label>
@@ -82,6 +109,9 @@ const Register = () => {
                   value={registerData.password}
                   onChange={handleChange}
                 />
+                {valErrors.password && (
+                  <p className="text-danger">{valErrors.password}</p>
+                )}
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="RepPasswordTextInput">
@@ -93,6 +123,9 @@ const Register = () => {
                   value={registerData.repPassword}
                   onChange={handleChange}
                 />
+                {valErrors.repPassword && (
+                  <p className="text-danger">{valErrors.repPassword}</p>
+                )}
               </Form.Group>
               <p className="text-danger">{errorMsg}</p>
               <Button onClick={onSubmit}>Submit</Button>
